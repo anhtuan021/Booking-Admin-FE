@@ -73,7 +73,7 @@ export default function RegisterPage() {
               <div className="login-left">
                 <img
                   className="img-fluid"
-                  src="https://photographer-booking.vercel.app/theme/assets/img/logo-1.png"
+                  src="/theme/assets/img/logo-1.png"
                   alt="Logo"
                 />
               </div>

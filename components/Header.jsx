@@ -27,13 +27,13 @@ export default function AdminHome() {
       <div className="header-left">
         <a href="/" className="logo">
           <img
-            src="https://photographer-booking.vercel.app/theme/assets/img/logo-1.png"
+            src="/theme/assets/img/logo-1.png"
             alt="Logo"
           />
         </a>
         <a href="/" className="logo logo-small">
           <img
-            src="https://photographer-booking.vercel.app/theme/assets/img/logo-1.png"
+            src="/theme/assets/img/logo-1.png"
             alt="Logo"
             width="30"
             height="30"
