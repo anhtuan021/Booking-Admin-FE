@@ -58,26 +58,24 @@ export default function AlbumsPage() {
           dtRef.current.row.add([
             idx + 1,
             album.title || "-",
-            `${
-              album.minPrice
-                ? Number(album.minPrice).toLocaleString("vi-VN")
-                : "0"
+            `${album.minPrice
+              ? Number(album.minPrice).toLocaleString("vi-VN")
+              : "0"
             }`,
             album.category || "-",
             album.status || "-",
             moment(album.createdAt).format("DD/MM/YYYY") || "-",
             Array.isArray(album.imageUrl) && album.imageUrl.length > 0
               ? album.imageUrl
-                  .map(
-                    (img) =>
-                      `<a href="/profile" class="avatar avatar-sm me-2">
-                        <img class="avatar-img" src="${
-                          img ||
-                          "/theme/admin/assets/img/specialities/specialities-06.png"
-                        }" alt="img"/>
+                .map(
+                  (img) =>
+                    `<a href="/profile" class="avatar avatar-sm me-2">
+                        <img class="avatar-img" src="${img ||
+                    "/theme/admin/assets/img/specialities/specialities-06.png"
+                    }" alt="img"/>
                       </a>`
-                  )
-                  .join("")
+                )
+                .join("")
               : `
                 <a href="/profile" class="avatar avatar-sm me-2">
                         <img class="avatar-img" src="/theme/admin/assets/img/specialities/specialities-06.png" alt="img"/>
@@ -288,6 +286,33 @@ export default function AlbumsPage() {
       setEditLoading(false);
     }
   }
+  async function handleDeleteConfirm() {
+  try {
+    if (!viewAlbum?.id) return;
+
+    const res = await fetch(`/api/v1/portfolios/${viewAlbum.id}`, {
+      method: 'DELETE',
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("admin_token")}`,
+      },
+    });
+    if (!res.ok) throw new Error('Xóa album thất bại');
+
+    // Đóng modal xóa
+    const modal = document.getElementById("delete_modal");
+    const modalInstance = window.bootstrap.Modal.getInstance(modal);
+    if (modalInstance) modalInstance.hide();
+
+    // Cập nhật lại state galleries lọc bỏ album đã xóa
+    setGalleries((prev) => prev.filter((g) => g.id !== viewAlbum.id));
+
+    setViewAlbum(null);
+
+  } catch (error) {
+    alert(error.message);
+  }
+}
+
   return (
     <RequireAuth>
       <div className="main-wrapper">
@@ -698,7 +723,7 @@ export default function AlbumsPage() {
                             : "-"}
                         </p>
                         {Array.isArray(viewAlbum.imageUrl) &&
-                        viewAlbum.imageUrl.length > 0 ? (
+                          viewAlbum.imageUrl.length > 0 ? (
                           <div
                             style={{
                               display: "flex",
@@ -749,13 +774,13 @@ export default function AlbumsPage() {
                     <div className="form-content p-2">
                       <h4 className="modal-title">Delete</h4>
                       <p className="mb-4">Are you sure want to delete?</p>
-                      <button type="button" className="btn btn-primary">
-                        Save
+                      <button type="button" className="btn btn-danger" onClick={handleDeleteConfirm}>
+                        Delete
                       </button>
                       <span className="ml-10"> </span>
                       <button
                         type="button"
-                        className="btn btn-danger"
+                        className="btn btn-primary"
                         data-bs-dismiss="modal"
                       >
                         Close
