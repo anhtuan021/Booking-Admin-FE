@@ -672,13 +672,9 @@ const [deleteError, setDeleteError] = useState("");
                             <input
                               type="file"
                               className="form-control"
-                              onChange={(e) =>
-    setEditForm((f) => ({
-      ...f,
-      images: Array.from(e.target.files),
-    }))
-  }
-  multiple
+                               onChange={handleEditImage}
+                              placeholder="Image URL"
+                        
                             />
                           </div>
                         </div>
