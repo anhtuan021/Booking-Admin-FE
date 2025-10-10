@@ -1,35 +1,79 @@
 "use client";
-import { useSelector, useDispatch } from "react-redux";
-import { clearAuth } from "../store/authSlice";
+
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+
 export default function AdminHome() {
-  let user = useSelector((state) => state.auth.user);
-  const dispatch = useDispatch();
   const router = useRouter();
-  if (!user && typeof window !== "undefined") {
-    try {
-      user = JSON.parse(localStorage.getItem("admin_user"));
-    } catch {}
-  }
-  const role = user?.role || "";
+  const [profile, setProfile] = useState({
+    avatarUrl: "",
+    firstName: "",
+    lastName: "",
+    role: "",
+  });
+
+  useEffect(() => {
+    async function fetchProfile() {
+      try {
+        const storedUser =
+          JSON.parse(localStorage.getItem("admin_user")) ||
+          JSON.parse(localStorage.getItem("photographer_user"));
+
+        if (!storedUser) return;
+
+        const role = storedUser?.role;
+        let api = "/api/v1/profiles/me";
+        if (role === "ADMIN") api = "/api/v1/admin/me";
+
+        const token =
+          localStorage.getItem("admin_token") ||
+          localStorage.getItem("photographer_token");
+
+        const res = await fetch(api, {
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "*/*",
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!res.ok) throw new Error("Failed to fetch profile");
+
+        const data = await res.json();
+        const responseData = data?.responseData;
+
+        setProfile({
+          avatarUrl:
+            responseData?.avatarUrl ||
+            "/theme/admin/assets/img/patients/patient2.jpg",
+          firstName: responseData?.firstName || "",
+          lastName: responseData?.lastName || "",
+          role: responseData?.role || role || "",
+        });
+      } catch (error) {
+        console.error("Error loading profile:", error);
+      }
+    }
+
+    fetchProfile();
+  }, []);
+
   function handleLogout(e) {
     e.preventDefault();
-    if (typeof window !== "undefined") {
-      localStorage.removeItem("admin_token");
-      localStorage.removeItem("admin_user");
-    }
-    dispatch(clearAuth());
+    localStorage.removeItem("admin_user");
+    localStorage.removeItem("admin_token");
+    localStorage.removeItem("photographer_user");
+    localStorage.removeItem("photographer_token");
     router.push("/login");
   }
+
+  const fullName = `${profile.firstName} ${profile.lastName}`.trim();
 
   return (
     <div className="header">
       <div className="header-left">
         <a href="/" className="logo">
-          <img
-            src="/theme/assets/img/logo-1.png"
-            alt="Logo"
-          />
+          <img src="/theme/assets/img/logo-1.png" alt="Logo" />
         </a>
         <a href="/" className="logo logo-small">
           <img
@@ -44,6 +88,7 @@ export default function AdminHome() {
       <a className="mobile_btn" id="mobile_btn">
         <i className="fa fa-bars"></i>
       </a>
+
       <ul className="nav user-menu">
         <li className="nav-item dropdown has-arrow">
           <a
@@ -54,35 +99,29 @@ export default function AdminHome() {
             <span className="user-img">
               <img
                 className="rounded-circle"
-                src={
-                  user?.avatar ||
-                  "/theme/admin/assets/img/patients/patient2.jpg"
-                }
+                src={profile.avatarUrl}
                 width="31"
-                alt={user?.lastName || "Administrator"}
+                height="31"
+                alt={fullName || "User"}
               />
             </span>
+            <span className="ml-2">{fullName || "Loading..."}</span>
           </a>
           <div className="dropdown-menu">
             <div className="user-header">
               <div className="avatar avatar-sm">
                 <img
-                  src={
-                    user?.avatar ||
-                    "/theme/admin/assets/img/patients/patient2.jpg"
-                  }
-                  alt="User Image"
+                  src={profile.avatarUrl}
+                  alt="User"
                   className="avatar-img rounded-circle"
                 />
               </div>
               <div className="user-text">
-                <h6>
-                  {user?.firstName + " " + user?.lastName || "Chưa đăng nhập"}
-                </h6>
-                <p className="text-muted mb-0">{user?.role || ""}</p>
+                <h6>{fullName || "Chưa đăng nhập"}</h6>
+                <p className="text-muted mb-0">{profile.role}</p>
               </div>
             </div>
-            <a className="dropdown-item" href="./profile">
+            <a className="dropdown-item" href="/profile">
               My Profile
             </a>
             <a className="dropdown-item" href="#" onClick={handleLogout}>

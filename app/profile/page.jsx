@@ -199,28 +199,38 @@ export default function ProfilePage() {
         body: formData,
       });
 
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(
-          data?.responseStatus?.responseMessage || "Update failed"
-        );
+      // Đọc phản hồi dưới dạng text để tránh lỗi Unexpected token '<'
+      const text = await res.text();
+      let data = null;
+      try {
+        data = JSON.parse(text);
+      } catch (err) {
+        console.warn("Response is not JSON:", text);
       }
-      // Sau khi cập nhật thành công, reload lại profile
-      const data = await res.json();
+
+      if (!res.ok) {
+        const message =
+          data?.responseStatus?.responseMessage ||
+          data?.message ||
+          `Server error (${res.status})`;
+        throw new Error(message);
+      }
+
+      // Nếu ok, cập nhật profile
       if (role === "ADMIN") {
         setProfile({
           ...data.responseData,
           businessName:
-            data.responseData.firstName + " " + data.responseData.lastName ||
-            "",
+            data.responseData.firstName + " " + data.responseData.lastName || "",
           locationAddress: data.responseData.address || "",
         });
       } else {
         setProfile(data.responseData);
       }
+
       setEditSuccess("Update profile successfully!");
-      // Đóng modal
       window.$("#edit_personal_details").modal("hide");
+
     } catch (err) {
       setEditError(err.message);
     } finally {
@@ -292,10 +302,10 @@ export default function ProfilePage() {
                             <i className="fa-solid fa-location-dot" />{" "}
                             {profile.address ||
                               profile.locationAddress +
-                                " " +
-                                profile.ward +
-                                " " +
-                                profile.city ||
+                              " " +
+                              profile.ward +
+                              " " +
+                              profile.city ||
                               ""}
                           </div>
                           {role === "PHOTOGRAPHER" && (
@@ -350,8 +360,8 @@ export default function ProfilePage() {
                                   <p className="col-sm-10">
                                     {profile?.firstName
                                       ? profile?.firstName +
-                                        " " +
-                                        profile?.lastName
+                                      " " +
+                                      profile?.lastName
                                       : ""}
                                   </p>
                                 </div>
@@ -444,8 +454,8 @@ export default function ProfilePage() {
                                       <p className="col-sm-10">
                                         {profile.minPrice
                                           ? Number(
-                                              profile.minPrice
-                                            ).toLocaleString("vi-VN") + " VND"
+                                            profile.minPrice
+                                          ).toLocaleString("vi-VN") + " VND"
                                           : "0 VND"}
                                       </p>
                                     </div>
@@ -550,8 +560,8 @@ export default function ProfilePage() {
                                               value={
                                                 editForm.firstName
                                                   ? editForm.firstName +
-                                                    " " +
-                                                    editForm.lastName
+                                                  " " +
+                                                  editForm.lastName
                                                   : ""
                                               }
                                               onChange={(e) => {
