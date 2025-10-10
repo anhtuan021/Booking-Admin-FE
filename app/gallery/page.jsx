@@ -252,10 +252,7 @@ const [deleteError, setDeleteError] = useState("");
     setEditLoading(true);
     try {
       const formData = new FormData();
-     if (editForm.images && editForm.images.length > 0) {
-      editForm.images.forEach((file) => formData.append("images", file));
-    }
-
+      if (editForm.images) formData.append("image", editForm.images);
       formData.append("title", editForm.title);
       formData.append("description", editForm.description);
       formData.append("category", editForm.category);
