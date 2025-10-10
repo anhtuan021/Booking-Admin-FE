@@ -13,6 +13,9 @@ export default function AlbumsPage() {
   const [error, setError] = useState(null);
   const dtRef = useRef(null);
   const [viewAlbum, setViewAlbum] = useState(null);
+  const [deleteId, setDeleteId] = useState(null);
+const [deleteLoading, setDeleteLoading] = useState(false);
+const [deleteError, setDeleteError] = useState("");
   useEffect(() => {
     async function fetchGalleries() {
       try {
@@ -249,7 +252,10 @@ export default function AlbumsPage() {
     setEditLoading(true);
     try {
       const formData = new FormData();
-      if (editForm.images) formData.append("image", editForm.images);
+     if (editForm.images && editForm.images.length > 0) {
+      editForm.images.forEach((file) => formData.append("images", file));
+    }
+
       formData.append("title", editForm.title);
       formData.append("description", editForm.description);
       formData.append("category", editForm.category);
@@ -286,30 +292,59 @@ export default function AlbumsPage() {
       setEditLoading(false);
     }
   }
-  async function handleDeleteConfirm() {
-  try {
-    if (!viewAlbum?.id) return;
+  useEffect(() => {
+  $("#portfolio-table").off("click", ".btn.bg-danger-light");
+  $("#portfolio-table").on("click", ".btn.bg-danger-light", function (e) {
+    e.preventDefault();
+    const idx = $(this)
+      .closest("tr")
+      .find(".album-title-link1")
+      .data("album-index");
+    if (idx) {
+      setDeleteId(idx);
+      const modal = document.getElementById("delete_modal");
+      if (modal) {
+        const modalInstance = window.bootstrap.Modal.getOrCreateInstance(modal);
+        modalInstance.show();
+      }
+    }
+  });
+}, [galleries]);
 
-    const res = await fetch(`/api/v1/portfolios/${viewAlbum.id}`, {
-      method: 'DELETE',
+ async function handleDelete() {
+  if (!deleteId) return;
+  setDeleteLoading(true);
+  setDeleteError("");
+  try {
+    const api = `/api/v1/portfolios/${deleteId}`;
+    const res = await fetch(api, {
+      method: "DELETE",
       headers: {
         Authorization: `Bearer ${localStorage.getItem("admin_token")}`,
       },
     });
-    if (!res.ok) throw new Error('Xóa album thất bại');
+    if (!res.ok) throw new Error("Xóa portfolio thất bại");
 
-    // Đóng modal xóa
+    // Reload lại danh sách
+    const getRes = await fetch(`/api/v1/portfolios/me`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("admin_token")}`,
+      },
+    });
+    const getData = await getRes.json();
+    setGalleries(getData?.responseData || []);
+
+    // Đóng modal
     const modal = document.getElementById("delete_modal");
-    const modalInstance = window.bootstrap.Modal.getInstance(modal);
-    if (modalInstance) modalInstance.hide();
+    if (modal) {
+      const modalInstance = window.bootstrap.Modal.getInstance(modal);
+      if (modalInstance) modalInstance.hide();
+    }
 
-    // Cập nhật lại state galleries lọc bỏ album đã xóa
-    setGalleries((prev) => prev.filter((g) => g.id !== viewAlbum.id));
-
-    setViewAlbum(null);
-
-  } catch (error) {
-    alert(error.message);
+  } catch (err) {
+    setDeleteError(err.message);
+  } finally {
+    setDeleteLoading(false);
   }
 }
 
@@ -640,10 +675,13 @@ export default function AlbumsPage() {
                             <input
                               type="file"
                               className="form-control"
-                              onChange={handleEditImage}
-                              placeholder="Image URL"
-                              multiple
-                              required
+                              onChange={(e) =>
+    setEditForm((f) => ({
+      ...f,
+      images: Array.from(e.target.files),
+    }))
+  }
+  multiple
                             />
                           </div>
                         </div>
@@ -774,17 +812,24 @@ export default function AlbumsPage() {
                     <div className="form-content p-2">
                       <h4 className="modal-title">Delete</h4>
                       <p className="mb-4">Are you sure want to delete?</p>
-                      <button type="button" className="btn btn-danger" onClick={handleDeleteConfirm}>
-                        Delete
-                      </button>
-                      <span className="ml-10"> </span>
-                      <button
-                        type="button"
-                        className="btn btn-primary"
-                        data-bs-dismiss="modal"
-                      >
-                        Close
-                      </button>
+                      {deleteError && (
+            <div className="text-danger mb-2">{deleteError}</div>
+          )}
+          <button
+            type="button"
+            className="btn btn-danger me-2"
+            onClick={handleDelete}
+            disabled={deleteLoading}
+          >
+            {deleteLoading ? "Deleting..." : "Delete"}
+          </button>
+          <button
+            type="button"
+            className="btn btn-secondary"
+            data-bs-dismiss="modal"
+          >
+            Cancel
+          </button>
                     </div>
                   </div>
                 </div>
