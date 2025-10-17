@@ -62,9 +62,23 @@ export default function AdminHome() {
 
         if (!res.ok) throw new Error("Failed to fetch customers");
         const data = await res.json();
-        const list = (data.responseData || []).filter((item) => item.id);
-        const sorted = list.sort((a, b) => a.id - b.id);
-        setCustomers(sorted);
+        const list = (data.responseData || [])
+          .filter((item) => item.id)
+          .map((item) => {
+            // Chuẩn hóa email giống Photographer
+            const email =
+              item.email ||
+              item.account?.email ||
+              item.accounts?.[0]?.email ||
+              "-";
+            return {
+              ...item,
+              email,
+            };
+          })
+          .sort((a, b) => a.id - b.id);
+
+        setCustomers(list);
         setTotalCustomers(list.length);
       } catch (err) {
         setErrorCustomers(err.message || "Error fetching customers");
@@ -138,8 +152,8 @@ export default function AdminHome() {
                           {loading
                             ? "..."
                             : errorPhotographers
-                            ? "!"
-                            : totalPhotographers}
+                              ? "!"
+                              : totalPhotographers}
                         </h3>
                       </div>
                     </div>
@@ -166,8 +180,8 @@ export default function AdminHome() {
                           {loading
                             ? "..."
                             : errorCustomers
-                            ? "!"
-                            : totalCustomers}
+                              ? "!"
+                              : totalCustomers}
                         </h3>
                       </div>
                     </div>
@@ -218,8 +232,8 @@ export default function AdminHome() {
                           {loading
                             ? "..."
                             : errorBookings
-                            ? "!"
-                            : Number(
+                              ? "!"
+                              : Number(
                                 bookings
                                   .map((b) =>
                                     moment(b.date).isSame(moment(), "month")
@@ -286,7 +300,6 @@ export default function AdminHome() {
                   </div>
                 </div>
               </div>
-
               {/* Customers table */}
               <div className="col-md-6 d-flex">
                 <div className="card card-table flex-fill">
@@ -300,35 +313,34 @@ export default function AdminHome() {
                           <tr>
                             <th>ID</th>
                             <th>Name</th>
-                            <th>Date of Birth</th>
                             <th>Email</th>
-                            <th>Phone</th>
                           </tr>
                         </thead>
                         <tbody>
                           {loading ? (
-                            <tr><td colSpan={5}>Loading...</td></tr>
+                            <tr><td colSpan={3}>Loading...</td></tr>
                           ) : errorCustomers ? (
-                            <tr><td colSpan={5} className="text-danger">{errorCustomers}</td></tr>
+                            <tr><td colSpan={3} className="text-danger">{errorCustomers}</td></tr>
                           ) : customers.length === 0 ? (
-                            <tr><td colSpan={5}>No data available</td></tr>
+                            <tr><td colSpan={3}>No data available</td></tr>
                           ) : (
                             customers.map((customer) => (
                               <tr key={customer.id}>
                                 <td>{customer.id}</td>
-                                <td>{customer.firstName + " " + customer.lastName}</td>
-                                <td>{customer.dateOfBirth ? moment(customer.dateOfBirth).format("DD/MM/YYYY") : "-"}</td>
-                                <td>{customer.email || "-"}</td>
-                                <td>{customer.phone || "-"}</td>
+                                <td>{customer.firstName + " " + customer.lastName || "-"}</td>
+                                <td>{customer.email}</td>
                               </tr>
                             ))
                           )}
                         </tbody>
                       </table>
+
                     </div>
                   </div>
                 </div>
               </div>
+
+
             </div>
           </div>
         </div>

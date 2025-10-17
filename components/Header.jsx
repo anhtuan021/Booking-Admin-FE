@@ -71,19 +71,18 @@ export default function AdminHome() {
 
   return (
     <div className="header">
-      <div className="header-left">
-        <a href="/" className="logo">
-          <img src="/theme/assets/img/logo-1.png" alt="Logo" />
+      <div className="header-left" style={{ display: "flex", alignItems: "center" }}>
+        <a href="/" className="logo" style={{ display: "flex", alignItems: "center", textDecoration: "none" }}>
+          <img src="/theme/assets/img/logo-2.jpg" alt="Logo" style={{ height: "50px", width: "auto", marginRight: "10px" }} />
+          <span style={{ fontWeight: "bold", fontSize: "18px", color: "black" }}>BOOKSNAP</span>
         </a>
+
+        {/* Logo nhỏ (nếu vẫn cần) */}
         <a href="/" className="logo logo-small">
-          <img
-            src="/theme/assets/img/logo-1.png"
-            alt="Logo"
-            width="30"
-            height="30"
-          />
+          <img src="/theme/assets/img/logo-2.jpg" alt="Logo" width="30" height="30" />
         </a>
       </div>
+
 
       <a className="mobile_btn" id="mobile_btn">
         <i className="fa fa-bars"></i>
