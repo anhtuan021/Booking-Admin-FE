@@ -32,13 +32,13 @@ export default function RootLayout({ children }) {
 
         <link
           rel="shortcut icon"
-          href="/theme/admin/assets/img/favicon.png"
+          href="/theme/admin/assets/img/logo-2.jpg"
           type="image/x-icon"
         />
         <link
-          rel="apple-touch-icon"
+          rel="logo-2"
           sizes="180x180"
-          href="/theme/admin/assets/img/apple-touch-icon.png"
+          href="/theme/admin/assets/img/logo-2.jpg"
         />
 
         <link
