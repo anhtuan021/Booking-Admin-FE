@@ -61,7 +61,7 @@ export default function LoginPage() {
         const data = await res.json().catch(() => null);
         throw new Error(
           data?.responseStatus?.responseMessage ||
-            `Request failed: ${res.status}`
+          `Request failed: ${res.status}`
         );
       }
 
@@ -98,13 +98,19 @@ export default function LoginPage() {
         <div className="login-wrapper">
           <div className="container">
             <div className="loginbox">
-              <div className="login-left">
+              <div className="login-left" style={{ display: "flex", alignItems: "center" }}>
                 <img
-                  className="img-fluid"
-                  src="/theme/assets/img/logo-1.png"
+                  src="/theme/assets/img/logo-2.jpg"
                   alt="Logo"
+                  style={{ height: "120px", width: "auto", marginRight: "20px" }}
                 />
+                <div style={{ display: "flex", flexDirection: "column" }}>
+                  <span style={{ fontWeight: "bold", fontSize: "32px", color: "black" }}>
+                    BOOKSNAP
+                  </span>
+                </div>
               </div>
+
               <div className="login-right">
                 <div className="login-right-wrap">
                   <h1>Login</h1>
